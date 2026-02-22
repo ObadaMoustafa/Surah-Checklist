@@ -24,6 +24,8 @@ export default function App() {
   });
 
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState(null);
 
   // Find the currently selected student
   const selectedStudent = data.students.find(
@@ -54,17 +56,28 @@ export default function App() {
   };
 
   const handleDeleteStudent = (id) => {
-    if (window.confirm('هل أنت متأكد من حذف هذا الطالب وجميع بياناته؟')) {
+    setStudentToDelete(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    if (studentToDelete) {
       setData((prev) => {
-        const newStudents = prev.students.filter((s) => s.id !== id);
+        const newStudents = prev.students.filter(
+          (s) => s.id !== studentToDelete,
+        );
         return {
           students: newStudents,
           // If the deleted student was selected, deselect
           selectedStudentId:
-            prev.selectedStudentId === id ? null : prev.selectedStudentId,
+            prev.selectedStudentId === studentToDelete
+              ? null
+              : prev.selectedStudentId,
         };
       });
     }
+    setShowDeleteConfirm(false);
+    setStudentToDelete(null);
   };
 
   // --- Checklist Handlers (for the selected student) ---
@@ -233,6 +246,50 @@ export default function App() {
           <p>تم الحفظ تلقائياً في المتصفح • مُرتبة حسب المصحف الشريف</p>
         </footer>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 w-full max-w-sm transform transition-all scale-100 animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-6 h-6 text-red-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 mb-2 text-center">
+              حذف الطالب؟
+            </h3>
+            <p className="text-slate-500 text-sm text-center mb-6 leading-relaxed">
+              هل أنت متأكد من حذف هذا الطالب وجميع بيانات الحفظ الخاصة به؟{' '}
+              <br /> لا يمكن التراجع عن هذا الإجراء.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={confirmDelete}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 px-4 rounded-xl font-bold text-sm transition-colors shadow-sm active:scale-95"
+              >
+                نعم، حذف
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 px-4 rounded-xl font-bold text-sm transition-colors active:scale-95"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
